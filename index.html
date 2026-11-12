@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131d">
+  <meta name="description" content="Reproductor musical online con catálogo y playlists compartidas.">
+  <title>Groove Player — Música para compartir</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Groove Player inicio"><span class="brand-mark">♫</span><span>groove<span class="brand-light">player</span></span></a>
+      <div class="top-actions"><span class="live-dot">CATÁLOGO COMPARTIDO</span><button id="adminToggle" class="button button-quiet">Administrar</button></div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div><p class="eyebrow">TU MÚSICA, EN UN SOLO LUGAR</p><h1>El sonido que<br><span>nos conecta.</span></h1><p class="hero-copy">Explora el catálogo, elige una playlist y dale play. Todos escuchamos la misma biblioteca.</p></div>
+        <div class="hero-disc" aria-hidden="true"><div class="disc-center">♫</div></div>
+      </section>
+
+      <section class="library-section">
+        <div class="section-heading"><div><p class="eyebrow">BIBLIOTECA</p><h2>Explora la música</h2></div><span id="trackCount" class="count-pill">0 canciones</span></div>
+        <div class="library-tools">
+          <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Buscar canción o artista…" autocomplete="off"></label>
+          <select id="playlistSelect" aria-label="Seleccionar playlist"><option value="all">Todas las playlists</option></select>
+        </div>
+        <div id="status" class="status">Conectando con la biblioteca…</div>
+        <div id="trackList" class="track-list"></div>
+      </section>
+
+      <section id="adminPanel" class="admin-panel hidden">
+        <div class="section-heading"><div><p class="eyebrow">PANEL PRIVADO</p><h2>Administrar catálogo</h2></div><button id="logoutButton" class="button button-quiet hidden">Cerrar sesión</button></div>
+        <div id="loginBox" class="admin-card">
+          <p class="muted">Inicia sesión con la cuenta administradora que creaste en Supabase.</p>
+          <form id="loginForm" class="login-form"><label>Correo<input id="emailInput" type="email" required placeholder="tu-correo@ejemplo.com"></label><label>Contraseña<input id="passwordInput" type="password" required placeholder="Contraseña"></label><button class="button button-primary" type="submit">Iniciar sesión</button></form>
+          <p id="loginMessage" class="form-message"></p>
+        </div>
+        <div id="uploadBox" class="admin-card hidden">
+          <p class="muted">Sube archivos de audio. Elige un nombre de playlist; si ya existe, las canciones se agregarán a ella.</p>
+          <form id="uploadForm" class="upload-form"><label>Nombre de playlist<input id="playlistNameInput" type="text" value="General" maxlength="60" required></label><label class="file-drop">＋ Seleccionar canciones<input id="uploadInput" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.flac" multiple required></label><button class="button button-primary" type="submit">Subir al catálogo</button></form>
+          <p id="uploadMessage" class="form-message"></p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer"><span>GROOVE PLAYER</span><span>Hecho para compartir música.</span></footer>
+  </div>
+
+  <div class="player-dock">
+    <div class="playing-meta"><div class="mini-art">♫</div><div class="playing-text"><strong id="nowTitle">Selecciona una canción</strong><span id="nowArtist">Tu próxima canción te espera</span></div></div>
+    <div class="player-center"><div class="player-buttons"><button id="prevButton" class="icon-button" title="Anterior" aria-label="Anterior">|◀</button><button id="playButton" class="play-button" title="Reproducir o pausar" aria-label="Reproducir o pausar">▶</button><button id="nextButton" class="icon-button" title="Siguiente" aria-label="Siguiente">▶|</button><button id="repeatButton" class="icon-button repeat-button" title="Sin repetición" aria-label="Modo de repetición">↻<small id="repeatBadge"></small></button></div><audio id="audio" preload="none"></audio><div class="progress-row"><span id="currentTime">0:00</span><input id="progress" type="range" min="0" max="1000" value="0" aria-label="Progreso de canción"><span id="duration">0:00</span></div></div>
+    <div class="volume-control"><span>♪</span><input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volumen"></div>
+  </div>
+</body>
+</html>
