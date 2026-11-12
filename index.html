@@ -52,10 +52,38 @@
     <footer class="footer"><span>GROOVE PLAYER</span><span>Hecho para compartir música.</span></footer>
   </div>
 
-  <div class="player-dock">
-    <div class="playing-meta"><div class="mini-art">♫</div><div class="playing-text"><strong id="nowTitle">Selecciona una canción</strong><span id="nowArtist">Tu próxima canción te espera</span></div></div>
-    <div class="player-center"><div class="player-buttons"><button id="prevButton" class="icon-button" title="Anterior" aria-label="Anterior">|◀</button><button id="playButton" class="play-button" title="Reproducir o pausar" aria-label="Reproducir o pausar">▶</button><button id="nextButton" class="icon-button" title="Siguiente" aria-label="Siguiente">▶|</button><button id="repeatButton" class="icon-button repeat-button" title="Sin repetición" aria-label="Modo de repetición">↻<small id="repeatBadge"></small></button></div><audio id="audio" preload="none"></audio><div class="progress-row"><span id="currentTime">0:00</span><input id="progress" type="range" min="0" max="1000" value="0" aria-label="Progreso de canción"><span id="duration">0:00</span></div></div>
-    <div class="volume-control"><span>♪</span><input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volumen"></div>
+ <div class="player-dock">
+    <!-- 1. BLOQUE IZQUIERDO: Información de la canción -->
+    <div class="playing-meta">
+      <div class="mini-art">♫</div>
+      <div class="playing-text">
+        <strong id="nowTitle">Selecciona una canción</strong>
+        <span id="nowArtist">Tu próxima canción te espera</span>
+      </div>
+    </div>
+
+    <!-- 2. BLOQUE CENTRAL: Controles principales y barra de progreso -->
+    <div class="player-center">
+      <div class="player-buttons">
+        <button id="prevButton" class="icon-button" title="Anterior" aria-label="Anterior">|◀</button>
+        <button id="playButton" class="play-button" title="Reproducir o pausar" aria-label="Reproducir o pausar">▶</button>
+        <button id="nextButton" class="icon-button" title="Siguiente" aria-label="Siguiente">▶|</button>
+        <button id="repeatButton" class="icon-button repeat-button" title="Sin repetición" aria-label="Modo de repetición">↻<small id="repeatBadge"></small></button>
+      </div>
+      <audio id="audio" preload="none"></audio>
+      <div class="progress-row">
+        <span id="currentTime">0:00</span>
+        <input id="progress" type="range" min="0" max="1000" value="0" aria-label="Progreso de canción">
+        <span id="duration">0:00</span>
+      </div>
+    </div>
+
+    <!-- 3. BLOQUE DERECHO: Control de volumen separado -->
+    <div class="volume-control">
+      <span>♪</span>
+      <input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volumen">
+    </div>
+  </div>
   </div>
 </body>
 </html>
