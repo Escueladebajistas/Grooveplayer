@@ -2,10 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Groove Player — Música para compartir</title>
     <style>
-        /* --- ESTILOS GENERALES Y RESET --- */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -30,7 +28,6 @@
             margin-bottom: 16px;
         }
 
-        /* --- BARRA DE BÚSQUEDA Y FILTROS --- */
         .search-filter-bar {
             display: flex;
             gap: 16px;
@@ -43,7 +40,7 @@
             border-radius: 8px;
             color: #ffffff;
             padding: 12px 16px;
-            font-size: 16px; /* Evita zoom automático en iPhone */
+            font-size: 14px;
             outline: none;
             transition: border-color 0.2s;
         }
@@ -61,9 +58,8 @@
             cursor: pointer;
         }
 
-        /* --- CONTENEDOR DE CANCIONES --- */
         main {
-            padding: 0 32px 140px 32px; /* Espacio inferior para que la barra no tape contenido */
+            padding: 0 32px 120px 32px;
             flex: 1;
         }
 
@@ -249,58 +245,6 @@
             accent-color: #ffffff;
             cursor: pointer;
         }
-
-
-        /* --- DISEÑO RESPONSIVO PARA CELULARES (MEDIA QUERY) --- */
-        @media (max-width: 768px) {
-            header {
-                padding: 16px;
-            }
-
-            h1 {
-                font-size: 1.4rem;
-                margin-bottom: 12px;
-            }
-
-            .search-filter-bar {
-                flex-direction: column;
-                gap: 10px;
-                margin-bottom: 16px;
-            }
-
-            .playlist-select {
-                width: 100%;
-            }
-
-            main {
-                padding: 0 16px 160px 16px;
-            }
-
-            /* Barra inferior reorganizada para pantallas táctiles */
-            .player-bar {
-                grid-template-columns: 1fr;
-                gap: 12px;
-                padding: 16px;
-            }
-
-            .player-volume-container {
-                display: none; /* Se oculta el control de volumen en móviles para ganar espacio */
-            }
-
-            .player-center-controls {
-                width: 100%;
-            }
-
-            .progress-container {
-                max-width: 100%;
-            }
-
-            /* Botones más cómodos para el dedo */
-            .main-play-btn, .play-btn-small {
-                min-width: 42px;
-                min-height: 42px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -318,7 +262,7 @@
 
     <main>
         <div class="track-list" id="trackList">
-            <!-- Las canciones se cargarán aquí dinámicamente o puedes mantener tus elementos estáticos -->
+            <!-- Tus canciones se cargan aquí -->
         </div>
     </main>
 
@@ -351,26 +295,22 @@
         </div>
     </div>
 
-    <!-- Elemento de Audio Global con manejo corregido de URLs -->
     <script>
         const SUPABASE_URL = "https://qdnmogvlcjareklosiuu.supabase.co/storage/v1/object/public/music/";
         let audioElement = new Audio();
 
-        // Ejemplo de función para reproducir pistas de Supabase de forma segura (codificando espacios como %20)
+        // Función original con el ajuste de encodeURI para corregir las rutas con espacios
         function playTrack(storagePath, title, artist) {
-            // encodeURI asegura que espacios, tildes y caracteres especiales funcionen en celulares
             audioElement.src = SUPABASE_URL + encodeURI(storagePath);
             audioElement.play().then(() => {
                 document.getElementById('playPauseBtn').textContent = '⏸';
                 document.getElementById('currentTitle').textContent = title;
                 document.getElementById('currentArtist').textContent = artist || 'Artista desconocido';
             }).catch(error => {
-                console.error("El navegador bloqueó la reproducción automática:", error);
-                alert("Pulsa Play para iniciar la reproducción.");
+                console.error("Bloqueo de reproducción automática:", error);
             });
         }
 
-        // Control básico de reproducción
         const playPauseBtn = document.getElementById('playPauseBtn');
         playPauseBtn.addEventListener('click', () => {
             if (audioElement.paused) {
@@ -382,7 +322,6 @@
             }
         });
 
-        // Actualizar barra de progreso
         audioElement.addEventListener('timeupdate', () => {
             const progressBar = document.getElementById('progressBar');
             if (audioElement.duration) {
