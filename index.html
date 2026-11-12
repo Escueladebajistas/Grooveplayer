@@ -1,61 +1,402 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#10131d">
-  <meta name="description" content="Reproductor musical online con catálogo y playlists compartidas.">
-  <title>Groove Player — Música para compartir</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-  <script defer src="app.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Groove Player — Música para compartir</title>
+    <style>
+        /* --- ESTILOS GENERALES Y RESET --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 24px 32px 16px 32px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+        }
+
+        /* --- BARRA DE BÚSQUEDA Y FILTROS --- */
+        .search-filter-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .search-input, .playlist-select {
+            background-color: #242424;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 12px 16px;
+            font-size: 16px; /* Evita zoom automático en iPhone */
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input {
+            flex: 1;
+        }
+
+        .search-input:focus, .playlist-select:focus {
+            border-color: #1db954;
+        }
+
+        .playlist-select {
+            width: 200px;
+            cursor: pointer;
+        }
+
+        /* --- CONTENEDOR DE CANCIONES --- */
+        main {
+            padding: 0 32px 140px 32px; /* Espacio inferior para que la barra no tape contenido */
+            flex: 1;
+        }
+
+        .track-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .track-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #181818;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .track-card:hover {
+            background-color: #282828;
+        }
+
+        .track-info-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .play-btn-small {
+            background-color: #1db954;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #000;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .track-details h3 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .track-details p {
+            font-size: 0.85rem;
+            color: #b3b3b3;
+        }
+
+        .track-badge {
+            background-color: #2a2a2a;
+            color: #b3b3b3;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        /* --- BARRA INFERIOR DEL REPRODUCTOR --- */
+        .player-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #181818;
+            border-top: 1px solid #282828;
+            padding: 16px 24px;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            align-items: center;
+            gap: 16px;
+            z-index: 1000;
+        }
+
+        .player-current-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .player-current-thumb {
+            width: 48px;
+            height: 48px;
+            background-color: #282828;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .player-current-text h4 {
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+
+        .player-current-text p {
+            font-size: 0.8rem;
+            color: #b3b3b3;
+        }
+
+        .player-center-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-buttons {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #b3b3b3;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+
+        .control-btn:hover {
+            color: #ffffff;
+        }
+
+        .main-play-btn {
+            background-color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 500px;
+            font-size: 0.75rem;
+            color: #b3b3b3;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background-color: #4d4d4d;
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            accent-color: #ffffff;
+        }
+
+        .player-volume-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .volume-bar {
+            width: 100px;
+            height: 4px;
+            background-color: #4d4d4d;
+            border-radius: 2px;
+            outline: none;
+            accent-color: #ffffff;
+            cursor: pointer;
+        }
+
+
+        /* --- DISEÑO RESPONSIVO PARA CELULARES (MEDIA QUERY) --- */
+        @media (max-width: 768px) {
+            header {
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+                margin-bottom: 12px;
+            }
+
+            .search-filter-bar {
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+
+            .playlist-select {
+                width: 100%;
+            }
+
+            main {
+                padding: 0 16px 160px 16px;
+            }
+
+            /* Barra inferior reorganizada para pantallas táctiles */
+            .player-bar {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                padding: 16px;
+            }
+
+            .player-volume-container {
+                display: none; /* Se oculta el control de volumen en móviles para ganar espacio */
+            }
+
+            .player-center-controls {
+                width: 100%;
+            }
+
+            .progress-container {
+                max-width: 100%;
+            }
+
+            /* Botones más cómodos para el dedo */
+            .main-play-btn, .play-btn-small {
+                min-width: 42px;
+                min-height: 42px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="shell">
-    <header class="topbar">
-      <a class="brand" href="#top" aria-label="Groove Player inicio"><span class="brand-mark">♫</span><span>groove<span class="brand-light">player</span></span></a>
-      <div class="top-actions"><span class="live-dot">CATÁLOGO COMPARTIDO</span><button id="adminToggle" class="button button-quiet">Administrar</button></div>
+
+    <header>
+        <h1>Explora la música</h1>
+        <div class="search-filter-bar">
+            <input type="text" class="search-input" placeholder="Buscar canción o artista...">
+            <select class="playlist-select">
+                <option value="all">Todas las playlists</option>
+                <option value="General">General</option>
+            </select>
+        </div>
     </header>
 
-    <main id="top">
-      <section class="hero">
-        <div><p class="eyebrow">TU MÚSICA, EN UN SOLO LUGAR</p><h1>El sonido que<br><span>nos conecta.</span></h1><p class="hero-copy">Explora el catálogo, elige una playlist y dale play. Todos escuchamos la misma biblioteca.</p></div>
-        <div class="hero-disc" aria-hidden="true"><div class="disc-center">♫</div></div>
-      </section>
-
-      <section class="library-section">
-        <div class="section-heading"><div><p class="eyebrow">BIBLIOTECA</p><h2>Explora la música</h2></div><span id="trackCount" class="count-pill">0 canciones</span></div>
-        <div class="library-tools">
-          <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Buscar canción o artista…" autocomplete="off"></label>
-          <select id="playlistSelect" aria-label="Seleccionar playlist"><option value="all">Todas las playlists</option></select>
+    <main>
+        <div class="track-list" id="trackList">
+            <!-- Las canciones se cargarán aquí dinámicamente o puedes mantener tus elementos estáticos -->
         </div>
-        <div id="status" class="status">Conectando con la biblioteca…</div>
-        <div id="trackList" class="track-list"></div>
-      </section>
-
-      <section id="adminPanel" class="admin-panel hidden">
-        <div class="section-heading"><div><p class="eyebrow">PANEL PRIVADO</p><h2>Administrar catálogo</h2></div><button id="logoutButton" class="button button-quiet hidden">Cerrar sesión</button></div>
-        <div id="loginBox" class="admin-card">
-          <p class="muted">Inicia sesión con la cuenta administradora que creaste en Supabase.</p>
-          <form id="loginForm" class="login-form"><label>Correo<input id="emailInput" type="email" required placeholder="tu-correo@ejemplo.com"></label><label>Contraseña<input id="passwordInput" type="password" required placeholder="Contraseña"></label><button class="button button-primary" type="submit">Iniciar sesión</button></form>
-          <p id="loginMessage" class="form-message"></p>
-        </div>
-        <div id="uploadBox" class="admin-card hidden">
-          <p class="muted">Sube archivos de audio. Elige un nombre de playlist; si ya existe, las canciones se agregarán a ella.</p>
-          <form id="uploadForm" class="upload-form"><label>Nombre de playlist<input id="playlistNameInput" type="text" value="General" maxlength="60" required></label><label class="file-drop">＋ Seleccionar canciones<input id="uploadInput" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.flac" multiple required></label><button class="button button-primary" type="submit">Subir al catálogo</button></form>
-          <p id="uploadMessage" class="form-message"></p>
-        </div>
-      </section>
     </main>
 
-    <footer class="footer"><span>GROOVE PLAYER</span><span>Hecho para compartir música.</span></footer>
-  </div>
+    <!-- Barra Reproductor Fijo -->
+    <div class="player-bar">
+        <div class="player-current-info">
+            <div class="player-current-thumb">🎵</div>
+            <div class="player-current-text">
+                <h4 id="currentTitle">Selecciona una canción</h4>
+                <p id="currentArtist">Artista desconocido</p>
+            </div>
+        </div>
 
-  <div class="player-dock">
-    <div class="playing-meta"><div class="mini-art">♫</div><div class="playing-text"><strong id="nowTitle">Selecciona una canción</strong><span id="nowArtist">Tu próxima canción te espera</span></div></div>
-    <div class="player-center"><div class="player-buttons"><button id="prevButton" class="icon-button" title="Anterior" aria-label="Anterior">|◀</button><button id="playButton" class="play-button" title="Reproducir o pausar" aria-label="Reproducir o pausar">▶</button><button id="nextButton" class="icon-button" title="Siguiente" aria-label="Siguiente">▶|</button><button id="repeatButton" class="icon-button repeat-button" title="Sin repetición" aria-label="Modo de repetición">↻<small id="repeatBadge"></small></button></div><audio id="audio" preload="none"></audio><div class="progress-row"><span id="currentTime">0:00</span><input id="progress" type="range" min="0" max="1000" value="0" aria-label="Progreso de canción"><span id="duration">0:00</span></div></div>
-    <div class="volume-control"><span>♪</span><input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volumen"></div>
-  </div>
+        <div class="player-center-controls">
+            <div class="control-buttons">
+                <button class="control-btn" id="prevBtn">⏮</button>
+                <button class="main-play-btn" id="playPauseBtn">▶</button>
+                <button class="control-btn" id="nextBtn">⏭</button>
+            </div>
+            <div class="progress-container">
+                <span id="currentTime">0:00</span>
+                <input type="range" class="progress-bar" id="progressBar" value="0" min="0" max="100">
+                <span id="durationTime">0:00</span>
+            </div>
+        </div>
+
+        <div class="player-volume-container">
+            <span>🔊</span>
+            <input type="range" class="volume-bar" id="volumeBar" min="0" max="1" step="0.01" value="1">
+        </div>
+    </div>
+
+    <!-- Elemento de Audio Global con manejo corregido de URLs -->
+    <script>
+        const SUPABASE_URL = "https://qdnmogvlcjareklosiuu.supabase.co/storage/v1/object/public/music/";
+        let audioElement = new Audio();
+
+        // Ejemplo de función para reproducir pistas de Supabase de forma segura (codificando espacios como %20)
+        function playTrack(storagePath, title, artist) {
+            // encodeURI asegura que espacios, tildes y caracteres especiales funcionen en celulares
+            audioElement.src = SUPABASE_URL + encodeURI(storagePath);
+            audioElement.play().then(() => {
+                document.getElementById('playPauseBtn').textContent = '⏸';
+                document.getElementById('currentTitle').textContent = title;
+                document.getElementById('currentArtist').textContent = artist || 'Artista desconocido';
+            }).catch(error => {
+                console.error("El navegador bloqueó la reproducción automática:", error);
+                alert("Pulsa Play para iniciar la reproducción.");
+            });
+        }
+
+        // Control básico de reproducción
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        playPauseBtn.addEventListener('click', () => {
+            if (audioElement.paused) {
+                audioElement.play();
+                playPauseBtn.textContent = '⏸';
+            } else {
+                audioElement.pause();
+                playPauseBtn.textContent = '▶';
+            }
+        });
+
+        // Actualizar barra de progreso
+        audioElement.addEventListener('timeupdate', () => {
+            const progressBar = document.getElementById('progressBar');
+            if (audioElement.duration) {
+                progressBar.value = (audioElement.currentTime / audioElement.duration) * 100;
+                document.getElementById('currentTime').textContent = formatTime(audioElement.currentTime);
+                document.getElementById('durationTime').textContent = formatTime(audioElement.duration);
+            }
+        });
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+        }
+    </script>
 </body>
 </html>
